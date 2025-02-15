@@ -1,12 +1,13 @@
 pipeline {
-    agent {
-        docker {
-            image 'node:16-buster-slim'
-            args '-p 3000:3000'
-        }
-    }
+    agent any // Tidak menghentikan container setelah Test
     stages {
         stage('Build') {
+            agent {
+                docker {
+                    image 'node:16-buster-slim'
+                    args '--network=host -p 3000:3000'
+                }
+            }
             steps {
                 sh 'npm install'
             }
@@ -16,15 +17,18 @@ pipeline {
                 sh './jenkins/scripts/test.sh'
             }
         }
-        stage('Deploy') { 
+        stage('Deploy') {
             steps {
-                sh './jenkins/scripts/deliver.sh' 
-                input message: 'Sudah selesai menggunakan React App? (Klik "Proceed" untuk mengakhiri)' 
-                sh './jenkins/scripts/kill.sh' 
+                sh './jenkins/scripts/deliver.sh'
+                input message: 'Sudah selesai menggunakan React App? (Klik "Proceed" untuk mengakhiri)'
+                sh './jenkins/scripts/kill.sh'
             }
         }
     }
 }
+
+
+
 
 
 // pipeline {
